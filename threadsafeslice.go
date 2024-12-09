@@ -70,12 +70,14 @@ func (t *ThreadSafeSlice[T]) Push(v ...T) *ThreadSafeSlice[T] {
 	return t
 }
 
-// Clears the content of the slice.
-func (t *ThreadSafeSlice[T]) Clear() {
+// Clears the content of the slice. Returns the slice for chaining.
+func (t *ThreadSafeSlice[T]) Clear() *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.slice = []T{}
+
+	return t
 }
 
 // Sets the underlying slice to the given slice. Returns the slice for chaining.
