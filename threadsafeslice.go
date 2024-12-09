@@ -4,12 +4,16 @@ import (
 	"sync"
 )
 
-type IsEmpty bool
-
 type ThreadSafeSlice[T any] struct {
 	mu    sync.Mutex
 	slice []T
 }
+
+// Mapping callback that passes in a (v)alue, (i)ndex, and (s)lice.
+type MapCallback[T any] func(v T, i int, s []T) T
+
+// A boolean representing if a slice is empty or not.
+type IsEmpty bool
 
 // Removes and returns the first value of the slice. IsEmpty is true if
 // no more values can be shifted from the slice.
@@ -123,7 +127,7 @@ func (t *ThreadSafeSlice[T]) Length() int {
 
 // Maps over the slice, replacing each value with the result
 // of the given callback. Returns the slice for chaining.
-func (t *ThreadSafeSlice[T]) Map(callback func(v T, i int, s []T) T) *ThreadSafeSlice[T] {
+func (t *ThreadSafeSlice[T]) Map(callback MapCallback[T]) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -140,7 +144,7 @@ func (t *ThreadSafeSlice[T]) Map(callback func(v T, i int, s []T) T) *ThreadSafe
 // Maps over the slice, replacing each value with the result
 // of the given callback. Returns a new *ThreadSafeSlice[T],
 // distinct from the original.
-func (t *ThreadSafeSlice[T]) MapCopy(callback func(v T, i int, s []T) T) *ThreadSafeSlice[T] {
+func (t *ThreadSafeSlice[T]) MapCopy(callback MapCallback[T]) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
