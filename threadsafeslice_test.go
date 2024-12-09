@@ -173,8 +173,8 @@ func TestMap(t *testing.T) {
 	m := tss.Map(func(v, i int, s []int) int {
 		return v + 1
 	})
-	if tss.At(-1) != 4 {
-		t.Error("expected the last element to be 4")
+	if !slices.Equal(tss.Get(), []int{2, 3, 4}) {
+		t.Error("map result doesn't match expected values")
 	}
 	if tss != m {
 		t.Error("expected tss and m to be the same entity")
@@ -183,13 +183,16 @@ func TestMap(t *testing.T) {
 
 func TestMapCopy(t *testing.T) {
 	tss := Initialize([]int{1, 2, 3})
-	m := tss.MapCopy(func(v, i int, s []int) int {
+	c := tss.MapCopy(func(v, i int, s []int) int {
 		return v + 1
 	})
-	if tss.At(-1) != 4 {
-		t.Error("expected the last element to be 4")
+	if slices.Equal(tss.Get(), []int{2, 3, 4}) {
+		t.Error("original slice values were unexpectedly affected")
 	}
-	if tss == m {
+	if !slices.Equal(c.Get(), []int{2, 3, 4}) {
+		t.Error("map result doesn't match expected values")
+	}
+	if tss == c {
 		t.Error("expected tss and m to be distinct entities")
 	}
 }
@@ -213,5 +216,39 @@ func TestThreadSafe(t *testing.T) {
 	finalLength := tss.Length()
 	if finalLength != gc {
 		t.Errorf("Expected length %d, got %d", gc, finalLength)
+	}
+}
+
+func TestSort(t *testing.T) {
+	tss := Initialize([]int{1, 2, 3})
+	s := tss.Sort(func(a, b int) bool {
+		return a > b
+	})
+
+	if !slices.Equal(tss.Get(), []int{3, 2, 1}) {
+		t.Error("Sort failed")
+	}
+
+	if tss != s {
+		t.Error("The slice instance after Sort should be the same")
+	}
+}
+
+func TestSortCopy(t *testing.T) {
+	tss := Initialize([]int{1, 2, 3})
+	c := tss.SortCopy(func(a, b int) bool {
+		return a > b
+	})
+
+	if !slices.Equal(tss.Get(), []int{1, 2, 3}) {
+		t.Error("SortCopy unexpectly changed the original slice")
+	}
+
+	if !slices.Equal(c.Get(), []int{3, 2, 1}) {
+		t.Error("SortCopy failed")
+	}
+
+	if tss == c {
+		t.Error("The slice instance after SortCopy should NOT be the same")
 	}
 }
