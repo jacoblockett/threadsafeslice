@@ -2,6 +2,7 @@ package threadsafeslice
 
 import (
 	"reflect"
+	"slices"
 	"sync"
 	"testing"
 )
@@ -107,26 +108,36 @@ func TestAt(t *testing.T) {
 func TestUnshift(t *testing.T) {
 	tss := Initialize([]int{1, 2})
 	tss.Unshift(0)
-	if tss.At(0) != 0 {
-		t.Error("expected the first element to be 0")
+	if !slices.Equal(tss.Get(), []int{0, 1, 2}) {
+		t.Error("tss.Unshift(0) failed")
 	}
 
 	tss.Unshift(1).Unshift(2)
-	if tss.At(0) != 2 || tss.At(1) != 1 {
-		t.Error("expected the first two elements to be [2, 1, ...]")
+	if !slices.Equal(tss.Get(), []int{2, 1, 0, 1, 2}) {
+		t.Error("tss.Unshift(1).Unshift(2) failed")
+	}
+
+	tss.Unshift(7, 8, 9)
+	if !slices.Equal(tss.Get(), []int{7, 8, 9, 2, 1, 0, 1, 2}) {
+		t.Error("tss.Unshift(7, 8, 9) failed")
 	}
 }
 
 func TestPush(t *testing.T) {
 	tss := Initialize([]int{1, 2})
 	tss.Push(0)
-	if tss.At(-1) != 0 {
-		t.Error("expected the last element to be 0")
+	if !slices.Equal(tss.Get(), []int{1, 2, 0}) {
+		t.Error("tss.Push(0) failed")
 	}
 
 	tss.Push(1).Push(2)
-	if tss.At(-2) != 1 || tss.At(-1) != 2 {
-		t.Error("expected the last two elements to be [..., 1, 2]")
+	if !slices.Equal(tss.Get(), []int{1, 2, 0, 1, 2}) {
+		t.Error("tss.Push(1).Push(2) failed")
+	}
+
+	tss.Push(7, 8, 9)
+	if !slices.Equal(tss.Get(), []int{1, 2, 0, 1, 2, 7, 8, 9}) {
+		t.Error("tss.Push(1).Push(2) failed")
 	}
 }
 
