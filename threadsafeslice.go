@@ -1,6 +1,7 @@
 package threadsafeslice
 
 import (
+	"sort"
 	"sync"
 )
 
@@ -11,6 +12,9 @@ type ThreadSafeSlice[T any] struct {
 
 // Mapping callback that passes in a (v)alue, (i)ndex, and (s)lice.
 type MapCallback[T any] func(v T, i int, s []T) T
+
+// Sorting callback that passes in comparison for side a and side b as integers.
+type SortCallback func(a, b int) bool
 
 // A boolean representing if a slice is empty or not.
 type IsEmpty bool
@@ -159,6 +163,27 @@ func (t *ThreadSafeSlice[T]) MapCopy(callback MapCallback[T]) *ThreadSafeSlice[T
 	}
 
 	return tss
+}
+
+// Sorts the slice using `sort.Slice`. Returns the slice for chaining.
+func (t *ThreadSafeSlice[T]) Sort(callback SortCallback) *ThreadSafeSlice[T] {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	sort.Slice(t.slice, callback)
+
+	return t
+}
+
+// Sorts the slice using `sort.Slice`. Does not affect the original slice.
+// Returns a new *ThreadSafeSlice[T], distinct from the original.
+func (t *ThreadSafeSlice[T]) SortCopy(callback SortCallback) *ThreadSafeSlice[T] {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	tss := Initialize(t.slice)
+
+	return tss.Sort(callback)
 }
 
 // Initializes a new *ThreadSafeSlice[T].
