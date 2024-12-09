@@ -32,13 +32,13 @@ func (t *ThreadSafeSlice[T]) Shift() (T, IsEmpty) {
 	return v, false
 }
 
-// Inserts the given value at the beginning of the slice, returning the
+// Inserts the given value(s) at the beginning of the slice, returning the
 // slice for chaining.
-func (t *ThreadSafeSlice[T]) Unshift(v T) *ThreadSafeSlice[T] {
+func (t *ThreadSafeSlice[T]) Unshift(v ...T) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	t.slice = append([]T{v}, t.slice...)
+	t.slice = append(v, t.slice...)
 
 	return t
 }
@@ -60,13 +60,13 @@ func (t *ThreadSafeSlice[T]) Pop() (T, IsEmpty) {
 	return v, false
 }
 
-// Inserts the given value at the end of the slice, returning the
+// Inserts the given value(s) at the end of the slice, returning the
 // slice for chaining.
-func (t *ThreadSafeSlice[T]) Push(v T) *ThreadSafeSlice[T] {
+func (t *ThreadSafeSlice[T]) Push(v ...T) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	t.slice = append(t.slice, v)
+	t.slice = append(t.slice, v...)
 
 	return t
 }
@@ -79,7 +79,7 @@ func (t *ThreadSafeSlice[T]) Clear() {
 	t.slice = []T{}
 }
 
-// Sets the slice to the given slice.
+// Sets the underlying slice to the given slice.
 func (t *ThreadSafeSlice[T]) Set(s []T) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -89,7 +89,7 @@ func (t *ThreadSafeSlice[T]) Set(s []T) *ThreadSafeSlice[T] {
 	return t
 }
 
-// Returns a copied snapshot of the slice.
+// Returns a copied snapshot of the underlying slice.
 func (t *ThreadSafeSlice[T]) Get() []T {
 	t.mu.Lock()
 	defer t.mu.Unlock()
