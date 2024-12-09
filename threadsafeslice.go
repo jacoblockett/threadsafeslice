@@ -32,7 +32,7 @@ func (t *ThreadSafeSlice[T]) Shift() (T, IsEmpty) {
 	return v, false
 }
 
-// Inserts the given value(s) at the beginning of the slice, returning the
+// Inserts the given value(s) at the beginning of the slice. Returns the
 // slice for chaining.
 func (t *ThreadSafeSlice[T]) Unshift(v ...T) *ThreadSafeSlice[T] {
 	t.mu.Lock()
@@ -60,8 +60,7 @@ func (t *ThreadSafeSlice[T]) Pop() (T, IsEmpty) {
 	return v, false
 }
 
-// Inserts the given value(s) at the end of the slice, returning the
-// slice for chaining.
+// Inserts the given value(s) at the end of the slice. Returns the slice for chaining.
 func (t *ThreadSafeSlice[T]) Push(v ...T) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -79,7 +78,7 @@ func (t *ThreadSafeSlice[T]) Clear() {
 	t.slice = []T{}
 }
 
-// Sets the underlying slice to the given slice.
+// Sets the underlying slice to the given slice. Returns the slice for chaining.
 func (t *ThreadSafeSlice[T]) Set(s []T) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -142,8 +141,8 @@ func (t *ThreadSafeSlice[T]) Map(callback MapCallback[T]) *ThreadSafeSlice[T] {
 }
 
 // Maps over the slice, replacing each value with the result
-// of the given callback. Returns a new *ThreadSafeSlice[T],
-// distinct from the original.
+// of the given callback. Does not affect the original slice.
+// Returns a new *ThreadSafeSlice[T], distinct from the original.
 func (t *ThreadSafeSlice[T]) MapCopy(callback MapCallback[T]) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
