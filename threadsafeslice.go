@@ -155,14 +155,7 @@ func (t *ThreadSafeSlice[T]) MapCopy(callback MapCallback[T]) *ThreadSafeSlice[T
 
 	tss := Initialize(t.slice)
 
-	for i, v := range t.slice {
-		snap := make([]T, len(tss.slice))
-		copy(snap, tss.slice)
-
-		t.slice[i] = callback(v, i, snap)
-	}
-
-	return tss
+	return tss.Map(callback)
 }
 
 // Sorts the slice using `sort.Slice`. Returns the slice for chaining.
