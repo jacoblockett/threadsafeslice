@@ -13,8 +13,13 @@ type ThreadSafeSlice[T any] struct {
 // Mapping callback that passes in a (v)alue, (i)ndex, and (s)lice.
 type MapCallback[T any] func(v T, i int, s []T) T
 
+type SortComparatee[T any] struct {
+	Index int
+	Value T
+}
+
 // Sorting callback that passes in comparison for side a and side b as integers.
-type SortCallback func(a, b int) bool
+type SortCallback[T any] func(a, b SortComparatee[T]) bool
 
 // A boolean representing if a slice is empty or not.
 type IsEmpty bool
@@ -159,18 +164,23 @@ func (t *ThreadSafeSlice[T]) MapCopy(callback MapCallback[T]) *ThreadSafeSlice[T
 }
 
 // Sorts the slice using `sort.Slice`. Returns the slice for chaining.
-func (t *ThreadSafeSlice[T]) Sort(callback SortCallback) *ThreadSafeSlice[T] {
+func (t *ThreadSafeSlice[T]) Sort(callback SortCallback[T]) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	sort.Slice(t.slice, callback)
+	sort.Slice(t.slice, func(i, j int) bool {
+		a := SortComparatee[T]{Index: i, Value: t.slice[i]}
+		b := SortComparatee[T]{Index: j, Value: t.slice[j]}
+
+		return callback(a, b)
+	})
 
 	return t
 }
 
 // Sorts the slice using `sort.Slice`. Does not affect the original slice.
 // Returns a new *ThreadSafeSlice[T], distinct from the original.
-func (t *ThreadSafeSlice[T]) SortCopy(callback SortCallback) *ThreadSafeSlice[T] {
+func (t *ThreadSafeSlice[T]) SortCopy(callback SortCallback[T]) *ThreadSafeSlice[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 

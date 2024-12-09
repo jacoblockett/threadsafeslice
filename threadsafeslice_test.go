@@ -221,8 +221,8 @@ func TestThreadSafe(t *testing.T) {
 
 func TestSort(t *testing.T) {
 	tss := Initialize([]int{1, 2, 3})
-	s := tss.Sort(func(a, b int) bool {
-		return a > b
+	s := tss.Sort(func(a, b SortComparatee[int]) bool {
+		return a.Value > b.Value
 	})
 
 	if !slices.Equal(tss.Get(), []int{3, 2, 1}) {
@@ -236,8 +236,8 @@ func TestSort(t *testing.T) {
 
 func TestSortCopy(t *testing.T) {
 	tss := Initialize([]int{1, 2, 3})
-	c := tss.SortCopy(func(a, b int) bool {
-		return a > b
+	c := tss.SortCopy(func(a, b SortComparatee[int]) bool {
+		return a.Value > b.Value
 	})
 
 	if !slices.Equal(tss.Get(), []int{1, 2, 3}) {
